@@ -11,7 +11,7 @@ import io.reactivex.functions.Predicate;
 class CountriesServiceSolved implements CountriesService {
 
     private static final int ONE_MILLION = 1_000_000;
-    private final Predicate<Country> populationMoreThanOneMillion = country -> country.population > ONE_MILLION;
+    private final Predicate<Country> POPULATION_MORE_THAN_ONE_MILLION = country -> country.population > ONE_MILLION;
 
     @Override
     public Single<String> countryNameInCapitals(Country country) {
@@ -40,18 +40,20 @@ class CountriesServiceSolved implements CountriesService {
 
     @Override
     public Single<Boolean> isAllCountriesPopulationMoreThanOneMillion(List<Country> countries) {
-        return asObservable(countries).all(populationMoreThanOneMillion);
+        return asObservable(countries).all(POPULATION_MORE_THAN_ONE_MILLION);
     }
 
     @Override
     public Observable<Country> listPopulationMoreThanOneMillion(List<Country> countries) {
-        return asObservable(countries).filter(populationMoreThanOneMillion);
+        return asObservable(countries).filter(POPULATION_MORE_THAN_ONE_MILLION);
     }
 
 
     @Override
     public Observable<Country> listPopulationMoreThanOneMillion(FutureTask<List<Country>> countriesFromNetwork) {
-        return null; // put your solution here
+        return Observable.fromFuture(countriesFromNetwork)
+                .flatMap(Observable::fromIterable)
+                .filter(POPULATION_MORE_THAN_ONE_MILLION);
     }
 
     @Override
@@ -64,8 +66,7 @@ class CountriesServiceSolved implements CountriesService {
 
     @Override
     public Observable<Long> sumPopulationOfCountries(List<Country> countries) {
-        //return listPopulationOfEachCountry(countries).reduce((aLong, aLong2) -> aLong + aLong2);
-        return null;
+        return listPopulationOfEachCountry(countries).reduce((aLong, aLong2) -> aLong + aLong2).toObservable();
     }
 
     @Override
